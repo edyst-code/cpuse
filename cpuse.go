@@ -14,31 +14,17 @@ import (
 func main() {
 	reader := bufio.NewReader(os.Stdin)
 
-	// Get host
-	fmt.Print("Enter remote host: ")
-	remoteHostName, err := reader.ReadString('\n')
-	if err != nil {
-		log.Fatal("Failed to read host: ", err)
-	}
-	remoteHostName = strings.TrimRight(remoteHostName, "\n")
-
-	remotePort := 22
-	remoteHost := fmt.Sprintf("%s:%d", remoteHostName, remotePort)
-
-	fmt.Print("Enter username: ")
-	userName, err := reader.ReadString('\n')
-	if err != nil {
-		log.Fatal("Failed to read username: ", err)
-	}
-	userName = strings.TrimRight(userName, "\n")
-
-	// use private key
-	fmt.Print("Enter path to private key: ")
-	keyFile, err := reader.ReadString('\n')
-	if err != nil {
-		log.Fatal("Failed to read private key path: ", err)
-	}
-	keyFile = strings.TrimRight(keyFile, "\n")
+    remoteHostName, userName, keyFilePath = getArgs()
+    
+    if keyFilePath == nil {
+        // use private key
+        fmt.Print("Enter path to private key: ")
+        keyFile, err := reader.ReadString('\n')
+        if err != nil {
+            log.Fatal("Failed to read private key path: ", err)
+        }
+        keyFile = strings.TrimRight(keyFile, "\n")
+    }
 
 	key, err := ioutil.ReadFile(keyFile)
 	if err != nil {
@@ -67,3 +53,5 @@ func main() {
 	}
 	defer client.Close()
 }
+
+func getArgs() 
