@@ -3,13 +3,12 @@ package main
 import (
     "bufio"
     "fmt"
+    "io/ioutil"
     "os"
     "log"
     "strings"
-    "syscall"
 
     "golang.org/x/crypto/ssh"
-    "golang.org/x/term"
 )
 
 func main() {
@@ -33,18 +32,30 @@ func main() {
     }
     userName = strings.TrimRight(userName, "\n")
 
-    fmt.Print("Enter password: ")
-    bytePassword, err := term.ReadPassword(int(syscall.Stdin))
+    // use private key
+    fmt.Print("Enter path to private key: ")
+    keyFile, err := reader.ReadString('\n')
     if err != nil {
-        log.Fatal("Failed to read password: ", err)
+        log.Fatal("Failed to read private key path: ", err)
     }
-    password := string(bytePassword)
+    keyFile = strings.TrimRight(keyFile, "\n")
 
+    key, err := ioutil.ReadFile(keyFile)
+	if err != nil {
+		log.Fatalf("Unable to read private key: %v", err)
+	}
+
+	// Create the Signer for this private key.
+	signer, err := ssh.ParsePrivateKey(key)
+	if err != nil {
+		log.Fatalf("Unable to parse private key: %v", err)
+	}
+    
     // a config shared between client and server
     config := &ssh.ClientConfig{
         User: userName,
         Auth: []ssh.AuthMethod{
-            ssh.Password(password),
+            ssh.PublicKeys(signer),
         },
         HostKeyCallback: ssh.InsecureIgnoreHostKey(),
     }
