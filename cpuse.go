@@ -14,17 +14,19 @@ import (
 func main() {
 	reader := bufio.NewReader(os.Stdin)
 
-    remoteHostName, userName, keyFilePath = getArgs()
-    
-    if keyFilePath == nil {
-        // use private key
-        fmt.Print("Enter path to private key: ")
-        keyFile, err := reader.ReadString('\n')
-        if err != nil {
-            log.Fatal("Failed to read private key path: ", err)
-        }
-        keyFile = strings.TrimRight(keyFile, "\n")
-    }
+	remoteHostName, userName, keyFile := getArgs()
+
+	if keyFile == "" {
+		// use private key
+		var err error
+
+		fmt.Print("Enter path to private key: ")
+		keyFile, err = reader.ReadString('\n')
+		if err != nil {
+			log.Fatal("Failed to read private key path: ", err)
+		}
+		keyFile = strings.TrimRight(keyFile, "\n")
+	}
 
 	key, err := ioutil.ReadFile(keyFile)
 	if err != nil {
@@ -46,6 +48,7 @@ func main() {
 		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
 	}
 
+	remoteHost := fmt.Sprintf("%s:%d", remoteHostName, 22)
 	log.Printf("Connecting to %s...\n", remoteHost)
 	client, err := ssh.Dial("tcp", remoteHost, config)
 	if err != nil {
@@ -54,4 +57,14 @@ func main() {
 	defer client.Close()
 }
 
-func getArgs() 
+func getArgs() (string, string, string) {
+	if len(os.Args) > 3 {
+		return os.Args[1], os.Args[2], os.Args[3]
+	}
+	if len(os.Args) > 2 {
+		return os.Args[1], os.Args[2], ""
+	}
+
+	log.Fatal("usage incorrect")
+	return "", "", ""
+}
