@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+    "bytes"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -15,6 +16,7 @@ func main() {
 	reader := bufio.NewReader(os.Stdin)
 
 	remoteHostName, userName, keyFile := getArgs()
+    cmdToRun := "ps aux | grep gunicorn"
 
 	if keyFile == "" {
 		// use private key
@@ -55,6 +57,23 @@ func main() {
 		log.Fatal("Failed to dial: ", err)
 	}
 	defer client.Close()
+
+    // Each ClientConn can support multiple interactive sessions,
+	// represented by a Session.
+	session, err := client.NewSession()
+	if err != nil {
+		log.Fatal("Failed to create session: ", err)
+	}
+	defer session.Close()
+
+	// Once a Session is created, you can execute a single command on
+	// the remote side using the Run method.
+	var b bytes.Buffer
+	session.Stdout = &b
+	if err := session.Run(cmdToRun); err != nil {
+		log.Fatal("Failed to run: " + err.Error())
+	}
+	fmt.Println(b.String())
 }
 
 func getArgs() (string, string, string) {
