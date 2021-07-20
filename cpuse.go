@@ -2,7 +2,7 @@ package main
 
 import (
 	"bufio"
-    "bytes"
+	"bytes"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -16,7 +16,7 @@ func main() {
 	reader := bufio.NewReader(os.Stdin)
 
 	remoteHostName, userName, keyFile := getArgs()
-    cmdToRun := "ps aux | grep gunicorn"
+	cmdToRun := "ps aux | grep gunicorn"
 
 	if keyFile == "" {
 		// use private key
@@ -58,7 +58,7 @@ func main() {
 	}
 	defer client.Close()
 
-    // Each ClientConn can support multiple interactive sessions,
+	// Each ClientConn can support multiple interactive sessions,
 	// represented by a Session.
 	session, err := client.NewSession()
 	if err != nil {
